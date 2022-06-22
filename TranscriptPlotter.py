@@ -21,17 +21,17 @@ class TranscriptPlotter:
     def parse(self):
         df = pd.DataFrame({'person': self.title_list, 'lines': self.content_list})
 
-        # take first word of each title
+        # remove things with parentheses like (PAUSE), (BREAK), and other cut off phrases
+        df = df[~df['person'].str.contains(r'^\(.*\)$')]
+        # remove page numbers
+        df = df[~df['person'].str.contains(r'\d+\.')]
+        # remove indicators that end with :
+        df = df[~df['person'].str.endswith(':')]
+        # take first word of each title phrase (cleans things like 'Mark (V.O)', replaces with 'Mark')
         df['person'] = df['person'].apply(lambda p: p.strip().split(' ')[0])
-        # if just number, replace with --TRANSITION--
-        df['person'] = df['person'].replace(r'\d+\.', '--TRANSITION--', regex=True)
-        # remove common cinematography titles, like CUT, INT, etc.
-        df = df[~df['person'].isin(['INT.', 'CUT', '(BEAT)'])]
-        # remove things with parentheses
-        # df = df[~(df['person'].contains('(') or df['person'].contains(')'))]
-        # skip title
-        df = df.iloc[2:]
-        # if not in top 20 list of chars, then don't include (used to remove redundant stuff)
+        # remove common non-character operations, which all end with . for the fist word (like INT.)
+        df = df[~df['person'].str.endswith('.')]
+        # if not in top 20 list of chars, then don't include, used to exclude any outliers
         top_20 = df['person'].value_counts()[:20]
         df = df[df['person'].isin(top_20.keys())]
         
