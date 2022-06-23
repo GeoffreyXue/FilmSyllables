@@ -16,10 +16,10 @@ class TranscriptScraper:
     
     # pass in a dictionary of name to url
     # returns all the file paths generated
-    def scrape_films(self, films):
+    def scrape_films(self, outputFolder, films):
         paths = []
         for (name, url) in films:
-            paths.append(self.scrape("output", name, url))
+            paths.append(self.scrape(outputFolder, name, url))
         return paths
     
     # scrapes a url and saves it as a txt file
@@ -30,13 +30,16 @@ class TranscriptScraper:
         if not scrapeExisting and path.exists(filePath):
             return filePath
 
-        # Get the website
-        self.driver.get(url)
-
-        # drills and waits for script, written in innerHTML and <b> tags
-        script_html = WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.TAG_NAME, 'pre')))
-
-        # save script to txt file for future parsing
-        with open(filePath, "w", encoding="utf-8") as f:
-            f.write(script_html.get_attribute('innerHTML'))
-        return filePath
+        try:
+            # Get the website
+            self.driver.get(url)
+            # drills and waits for script, written in innerHTML and <b> tags
+            script_html = WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located((By.TAG_NAME, 'pre')))
+        finally:
+            # save script to txt file for future parsing
+            with open(filePath, "w", encoding="utf-8") as f:
+                f.write(script_html.get_attribute('innerHTML'))
+                return filePath
+    
+    def finish(self):
+        self.driver.close()

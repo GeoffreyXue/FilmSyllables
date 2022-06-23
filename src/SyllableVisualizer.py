@@ -16,7 +16,7 @@ class SyllableVisualizer:
         self.log = log
     
     def convert_and_save(self, outputFolder, name):
-        if self.log: print("parsing...")
+        if self.log: print(f"parsing {name}...")
         self.parse()
         if self.log: print("finished parsing. generating image...")
         self.save_plot(outputFolder, name)
