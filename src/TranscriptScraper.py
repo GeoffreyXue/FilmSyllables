@@ -15,9 +15,12 @@ class TranscriptScraper:
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     
     # pass in a dictionary of name to url
+    # returns all the file paths generated
     def scrape_films(self, films):
+        paths = []
         for (name, url) in films:
-            self.scrape("output", name, url)
+            paths.append(self.scrape("output", name, url))
+        return paths
     
     # scrapes a url and saves it as a txt file
     # if scrapeExisting is false, it won't scrape any existing, matching names in the folder
@@ -25,7 +28,7 @@ class TranscriptScraper:
     def scrape(self, outputFolder, name, url, scrapeExisting=False):
         filePath = f"{outputFolder}/{name}.txt"
         if not scrapeExisting and path.exists(filePath):
-            return
+            return filePath
 
         # Get the website
         self.driver.get(url)
@@ -36,3 +39,4 @@ class TranscriptScraper:
         # save script to txt file for future parsing
         with open(filePath, "w", encoding="utf-8") as f:
             f.write(script_html.get_attribute('innerHTML'))
+        return filePath
